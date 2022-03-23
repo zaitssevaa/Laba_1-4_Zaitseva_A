@@ -9,9 +9,12 @@ using namespace std;
 
 class Gts
 {
-	vector<vector<int>> Edges;
+	vector<vector<int>> ribs;
+
 public:
-	bool Cyclical();
+
+	void TopologicalSort(const unordered_map<int, int>& VerticesIndex);
 
 	Gts(const vector<vector<int>>& e);
 };
+

@@ -3,13 +3,12 @@
 #include <vector>
 #include <iomanip> //setw
 #include <fstream>  //файлы
-#include <ctime> // для рандомных id
 #include <unordered_map>
-#include <set>
-#include "Pipe.h"
+#include "pipe.h"
 #include "KS.h"
 #include "input.h"
 #include "Gts.h"
+#include "Filter.h"
 
 using namespace std;
 
@@ -17,23 +16,6 @@ template<typename T>
 int SearchId(const T& map, int id) {
     if (map.find(id) != map.end()) return id;
     return -1;
-}
-
-bool SearchIdInVector(const vector<int>& vec, int id) {
-    for (auto& v : vec)
-        if (v == id)
-            return 1;
-    return 0;
-}
-
-template<typename T>
-int CreateID(const T& map) {
-    int NewID;
-    do {
-        srand((int)time(0));
-        NewID = 1 + rand() % 1000;
-    } while (SearchId(map, NewID) != -1);
-    return NewID;
 }
 
 void DrawMenu() {
@@ -48,46 +30,54 @@ void DrawMenu() {
         "9. Удалить КС  " << endl <<
         "10. Фильтры/пакетное редактирование " << endl <<
         "11. Соединить трубу " << endl <<
-        "12. Показать связи " << endl <<
+        "12. Удалить связи " << endl <<
+        "13. Показать связи " << endl <<
+        "14. Топологическая сортировка " << endl <<
         "0. Выход  " << endl <<
         "Выберите пункт меню: ";
 }
 
-void ShowAllPipes(const unordered_map<int, pipe>& pipes){
+void ShowAllPipes(const unordered_map<int, pipe>& pipes) {
     cout << "Трубопроводы" << endl;
-    pipe::DrawHeader(); 
-    for (auto& p : pipes) cout << setw(10) << p.first << p.second;
+    pipe::DrawHeader();
+    for (auto& [i, p] : pipes) cout << setw(10) << i << p;
 }
 
-void ShowAllKompres(const unordered_map<int, KS>& kompres){
+void ShowAllKompres(const unordered_map<int, KS>& kompres) {
     cout << "Компрессорные станции" << endl;
     KS::DrawHeader();
-    for (auto& k : kompres) cout << setw(10) << k.first << k.second;
+    for (auto& [i, k] : kompres) cout << setw(10) << i << k;
 }
 
 void EditAllPipes(unordered_map<int, pipe>& pipes) {
     cout << "Введите id трубы, которую хотите изменить: " << endl;
-    int id = input::NumberInput(0);
+    int id = NumberInput(0);
     if (SearchId(pipes, id) != -1) {
+        if (pipes[id].linked() && pipes[id].repair == 0) {
+            cout << "Труба " << id << " включена в сеть, вы уверены, что хотите выключить ее ? (1 - да, 0 - нет)" << endl;
+            if (NumberInput(0, 1) == 0) return;
+        }
         pipes[id].edit();
         pipe::DrawHeader();
         cout << setw(10) << id << pipes[id] << "Успешное редактирование" << endl;
         return;
-    } else
+    }
+    else
         cout << "Такого id не существует " << endl;
 }
 
 void EditAllKompres(unordered_map<int, KS>& kompres) {
-    int NewCountInWork, id = input::NumberInput(0);
+    int NewCountInWork, id = NumberInput(0);
     cout << "Введите id станции, которую хотите изменить: " << endl;
     if (SearchId(kompres, id) != -1) {
         cout << "Введите количество цехов в работе: " << endl;
-        NewCountInWork = input::NumberInput(0, kompres[id].Count);
+        NewCountInWork = NumberInput(0, kompres[id].Count);
         kompres[id].edit(NewCountInWork);
         KS::DrawHeader();
         cout << setw(10) << id << kompres[id] << "Успешное редактирование" << endl;
         return;
-    }else
+    }
+    else
         cout << "Такого id не существует " << endl;
 }
 
@@ -97,20 +87,22 @@ bool CreateFile(const unordered_map<int, pipe>& pipes, const unordered_map<int, 
     if (!fout.is_open())
         return false;
     if (pipes.size() > 0) {
-        fout << "pipe" << endl << pipes.size() << endl;
-        for (auto& p : pipes) {
-            fout << p.first << endl;
-            fout << p.second;
+        fout << "pipe" << endl << pipes.size() << endl << pipe::MaxId << endl;
+        for (auto& [i, p] : pipes) {
+            fout << i << endl;
+            fout << p;
         }
-    }else
+    }
+    else
         fout << "nopipe" << endl;
-    if (kompres.size() == 0) {
-        fout << "kc" << endl << kompres.size() << endl;
-        for (auto& k : kompres) {
-            fout << k.first << endl;
-            fout << k.second;
+    if (kompres.size() > 0) {
+        fout << "kc" << endl << kompres.size() << endl << KS::MaxId << endl;
+        for (auto& [i, k] : kompres) {
+            fout << i << endl;
+            fout << k;
         }
-    }else
+    }
+    else
         fout << "nokc" << endl;
     fout.close();
     return true;
@@ -126,10 +118,11 @@ bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, 
     fin >> input;
     if (input != "nopipe") {
         int n;
+        pipe NewPipe;
+        int id;
         fin >> n;
+        fin >> pipe::MaxId;
         for (int i = 0; i < n; ++i) {
-            pipe NewPipe;
-            int id;
             fin >> id;
             fin >> NewPipe;
             pipes.insert({ id, NewPipe });
@@ -138,11 +131,12 @@ bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, 
     kompres.clear();
     fin >> input;
     if (input != "nokc") {
+        KS NewKS;
+        int id;
         int n;
         fin >> n;
+        fin >> KS::MaxId;
         for (int i = 0; i < n; ++i) {
-            KS NewKS;
-            int id;
             fin >> id;
             fin >> NewKS;
             kompres.insert({ id, NewKS });
@@ -151,157 +145,81 @@ bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, 
     return true;
 }
 
-// Удаление
 template<typename T>
-void DeleteElement(T& map, int id) {
-    if (map.find(id) != map.end()) 
-        map.erase(id);
-}
-
-template<typename T>
-void Delete(T& map) {
+void Delete(unordered_map<int, T>& map) {
     cout << endl << "Введите id элемента, который хотите удалить (или 0 чтобы вернуться в меню): ";
     while (true) {
         int id = NumberInput(0);
         if (id == 0) return;
         if (SearchId(map, id) != -1) {
-            DeleteElement(map, id);
-            cout << "Элемент с id " << id << " удален";
-            return;
-        } else
+            if (map.at(id).linked()) {
+                cout << "Элемент находится в ГТС, сначала выключите его" << endl;
+                return;
+            }
+            else {
+                DeleteElement(map, id);
+                cout << "Элемент с id " << id << " удален";
+                return;
+            }
+        }
+        else
             cout << "ID не найден, попробуйте еще раз: ";
     }
 }
 
-// Фильтры
-template<typename T>
-bool CheckByName(const T& map, string param) {
-    return map.Name == param;
+void ShowConnection(const unordered_map<int, pipe>& pipes) {
+    for (auto& [i, p] : pipes)
+        if (p.linked())
+            p.showlink(i);
 }
 
-bool CheckByRepair(const pipe& pipe, bool param) {
-    return pipe.repair == param;
-}
-
-bool CheckByPercent(const KS& kompres, double param) {
-    return round(100 * (1. * (kompres.Count - kompres.CountInWork) / kompres.Count)) == param;
-}
-
-template<typename T, typename T_param>
-using Filter = bool (*)(const T& map, T_param param);
-
-template<typename T, typename T_param>
-vector<int> FindByFilter(const unordered_map<int, T>& map, Filter<T, T_param> f, T_param param) {
-    vector<int> res;
-    for (auto& m : map)
-        if (f(m.second, param))
-            res.push_back(m.first);
-    return res;
-}
-
-template <typename T>
-void PrintFindResult(const unordered_map<int, T>& map, const vector<int>& index) {
-    if (index.size() != 0) {
-        cout << "Найдено " << index.size() << " элементов" << endl;
-        T::DrawHeader();
-        for (auto& id : index)
-            cout << setw(10) << id << map.at(id);
-    }else
-        cout << "Ничего не найдено " << endl;
-}
-
-template <typename T>
-vector<int> FindByName(const unordered_map<int, T>& map) {
-    cout << "Введите имя, которое нужно найти: " << endl;
-    vector<int> index = FindByFilter(map, CheckByName, input::StrInput());
-    PrintFindResult(map, index);
-    return index;
-}
-
-vector<int> FindByRepair(const unordered_map<int, pipe>& pipes) {
-    cout << "Какие трубы нужно искать (1 - в ремонте, 0 - не в ремонте): " << endl;
-    vector<int> index = FindByFilter(pipes, CheckByRepair, bool(NumberInput(0, 1)));
-    PrintFindResult(pipes, index);
-    return index;
-}
-
-vector<int> FindByPercent(const unordered_map<int, KS> kompres) {
-    cout << "Введите процент нерабочих цехов: " << endl;
-    vector<int> index = FindByFilter(kompres, CheckByPercent, input::NumberInput(0., 100.));
-    PrintFindResult(kompres, index);
-    return index;
-}
-
-void EditingAfterFind(unordered_map<int, pipe>& pipes, vector<int> index) {
-    cout << "1. Редактировать найденые " << endl << "2. Выбрать и редактировать " << endl << "3. Удалить найденные"
-        << endl << "4. Выбрать и удалить" << endl << "0. Выход" << endl;
-    int casemenu = NumberInput(0, 4);
-    if (casemenu == 1) {
-        for (auto& id : index)
-            pipes[id].edit();
-    } else if (casemenu == 2) {
-        cout << "Введите Id (0-конец ввода) " << endl;
-        int input;
-        set<int> edit_id;
-        do {
-            input = NumberInput(0);
-            if (SearchIdInVector(index, input) == 1)
-                edit_id.insert(input);
-        } while (input != 0);
-        for (auto& id : edit_id)
-            pipes[id].edit();
-    } else if (casemenu == 3) {
-        for (auto& id : index)
-            DeleteElement(pipes, id);
-    } else if (casemenu == 4) {
-        cout << "Введите Id (0-конец ввода) " << endl;
-        int input;
-        set<int> edit_id;
-        do {
-            input = NumberInput(0);
-            if (SearchIdInVector(index, input) == 1)
-                edit_id.insert(input);
-        } while (input != 0);
-        for (auto& id : edit_id)
-            DeleteElement(pipes, id);
+void CreateBranch(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres) {
+    cout << "Введите ID трубы, которую нужно связать: " << endl;
+    int pipeId = SearchId(pipes, NumberInput(0));
+    cout << "Введите ID КС, откуда выходит труба: " << endl;
+    int out = SearchId(kompres, NumberInput(0));
+    cout << "Введите ID КС, куда входит труба: " << endl;
+    int in = SearchId(kompres, NumberInput(0));
+    if (pipeId != -1 && pipes[pipeId].in == 0 && pipes[pipeId].out == 0 && out != -1 && in != -1 && out != in) {
+        pipes[pipeId].link(in, out);
+        kompres[in].createLink();
+        kompres[out].createLink();
     }
+    else
+        cout << "Ошибка" << endl;
 }
 
-void PipeFilterMenu(unordered_map<int, pipe>& pipes) {
-    if (pipes.size() == 0) {
-        cout << "Трубы не добавлены " << endl;
-        return;
+void DeleteBranches(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres) {
+    ShowConnection(pipes);
+    cout << "Введите ID трубы, связь которой хотите удалить: " << endl;
+    int pipeId = SearchId(pipes, NumberInput(0));
+    if (pipeId != -1 && pipes[pipeId].linked()) {
+        kompres[pipes[pipeId].in].ClearLink();
+        kompres[pipes[pipeId].out].ClearLink();
+        pipes[pipeId].ClearLink();
     }
-    cout << endl << "Фильтр/редактирование труб" << endl << "1. Поиск труб по названию" << endl
-        << "2. Поиск труб по признаку в ремонте " << endl << "0. Выход" << endl;
-    int FilterCase = NumberInput(0, 2);
-    if (FilterCase == 1) {
-        vector<int> index = FindByName(pipes);
-        if (index.size() != 0)
-            EditingAfterFind(pipes, index);
-        return;
-    } else if (FilterCase == 2) {
-        vector<int> index = FindByRepair(pipes);
-        if (index.size() != 0)
-            EditingAfterFind(pipes, index);
-        return;
-    }
+    else
+        cout << "Ошибка" << endl;
 }
 
-void KSFilterMenu(unordered_map<int, KS>& kompres) {
-    if (kompres.size() == 0) {
-        cout << "Трубы не добавлены " << endl;
-        return;
-    }
-    cout << endl << "Фильтр по КС" << endl << "1. Поиск КС по названию" << endl
-        << "2. Поиск КС по проценту незадействованных цехов" << endl;
-    int FilterCase = input::NumberInput(1, 2);
-    if (FilterCase == 1) {
-        FindByName(kompres);
-    } else if (FilterCase == 2) {
-        FindByPercent(kompres);
-    }
-    return;
+vector<vector<int>> CreateGraph(const unordered_map<int, pipe>& pipes, const unordered_map<int, KS>& kompres) {
+    set<int> vertices;
+    for (const auto& [i, p] : pipes)
+        if (p.CanBeUsed() && kompres.count(p.in) && kompres.count(p.out))
+        {
+            vertices.insert(p.out);
+            vertices.insert(p.in);
+        }
+    unordered_map<int, int> VerticesIndex;
+    int i = 0;
+    for (const int& v : vertices)
+        VerticesIndex.insert({ v, i++ });
+    vector<vector<int>> r;
+    r.resize(vertices.size());
+    for (const auto& [i, p] : pipes)
+        if (p.CanBeUsed())
+            r[VerticesIndex[p.out]].push_back(VerticesIndex[p.in]);
+    return r;
 }
 
 int main() {
@@ -314,15 +232,15 @@ int main() {
         inputmenu = NumberInput(0);
         switch (inputmenu) {
         case 1: {
-            int NewID = CreateID(pipes);
             pipe NewPipe;
+            int NewID = ++NewPipe.MaxId;
             cin >> NewPipe;
             pipes.insert({ NewID, NewPipe });
             break;
         }
         case 2: {
-            int NewID = CreateID(kompres);
             KS NewKS;
+            int NewID = ++NewKS.MaxId;
             cin >> NewKS;
             kompres.insert({ NewID, NewKS });
             break;
@@ -361,8 +279,7 @@ int main() {
             cout << "Введите название файла: ";
             string FileName;
             getline(cin, FileName);
-            FileName = "./saves/" + FileName;
-            if (CreateFile(pipes, kompres, FileName)) {
+            if (CreateFile(pipes, kompres, "./saves/" + FileName)) {
                 cout << "Данные сохранены в файл" << endl;
             }
             else
@@ -373,8 +290,7 @@ int main() {
             cout << "Введите название файла: ";
             string FileName;
             getline(cin, FileName);
-            FileName = "./saves/" + FileName;
-            if (ReadFile(pipes, kompres, FileName)) {
+            if (ReadFile(pipes, kompres, "./saves/" + FileName)) {
                 cout << "Данные успешно загружены" << endl;
                 ShowAllPipes(pipes);
                 ShowAllKompres(kompres);
@@ -416,59 +332,45 @@ int main() {
             break;
         }
         case 11: {
-            if (pipes.size() > 0 && kompres.size() > 1) {
-                cout << "Введите ID трубы, которую нужно связать: " << endl;
-                int pipeId = SearchId(pipes, NumberInput(0));
-                cout << "Введите ID КС, откуда выходит труба: " << endl;
-                int out = SearchId(kompres, NumberInput(0));
-                cout << "Введите ID КС, куда входит труба: " << endl;
-                int in = SearchId(kompres, NumberInput(0));
-                if (pipeId != -1) {
-                    pipes[pipeId].link(in, out);
-                }
-                else
-                    cout << "Ошибка" << endl;
-            }
+            if (pipes.size() > 0 && kompres.size() > 1)
+                CreateBranch(pipes, kompres);
             else
                 cout << "Необходимые элементы не были добавлены " << endl;
             break;
         }
-        case 12: {
-            if (pipes.size() > 0 && kompres.size() > 1) {
-                for (auto& [i, p] : pipes)
-                    if (p.islinked())
-                        p.showlink(i);
-            }
+        case 12:
+        {
+            if (pipes.size() > 0 && kompres.size() > 1)
+                DeleteBranches(pipes, kompres);
             else
                 cout << "Ошибка " << endl;
             break;
         }
-               //case 13:
-               //{
-               //    set<int> vertices;
-               //    for (const auto& [i, p] : pipes)
-               //        if (p.CanBeUsed() && kompres.count(p.in) && kompres.count(p.out))
-               //        {
-               //            vertices.insert(p.out);
-               //            vertices.insert(p.in);
-               //        }
-               //    unordered_map<int, int> VerticesIndex, VerticesIndexReverse;
-               //    int i = 0;
-               //    for (const int& v : vertices) {
-               //        VerticesIndex.insert({ i, v });
-               //        VerticesIndexReverse.insert({ v,i++ });
-               //    }
-               //    vector<vector<int>> r;
-               //    r.resize(vertices.size());
-               //    for (const auto& p : pipes)
-               //        if (p.second.CanBeUsed())
-               //            r[VerticesIndexReverse[p.second.out]].push_back(VerticesIndexReverse[p.second.in]);
-               //    Gts ESG(r);
-               //    if (ESG.Cyclical() == false)
-               //        cout << "no";
-               //    else cout << "yes";
-               //    break;
-               //}
+        case 13: {
+            if (pipes.size() > 0 && kompres.size() > 1)
+                ShowConnection(pipes);
+            else
+                cout << "Ошибка " << endl;
+            break;
+        }
+        case 14:
+        {
+            vector<vector<int>> r = CreateGraph(pipes, kompres);
+            Gts ESG(r);
+            set<int> vertices;
+            for (const auto& [i, p] : pipes)
+                if (p.CanBeUsed() && kompres.count(p.in) && kompres.count(p.out))
+                {
+                    vertices.insert(p.out);
+                    vertices.insert(p.in);
+                }
+            unordered_map<int, int> VerticesIndex;
+            int i = 0;
+            for (const int& v : vertices)
+                VerticesIndex.insert({ i++, v });
+            ESG.TopologicalSort(VerticesIndex);
+            break;
+        }
         case 0: {
             return 0;
         }

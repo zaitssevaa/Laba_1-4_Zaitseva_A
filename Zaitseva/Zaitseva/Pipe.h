@@ -10,6 +10,7 @@ using namespace std;
 
 class pipe {
 public:
+    static int MaxId;
     string Name;
     double length;
     int diameter;
@@ -18,11 +19,13 @@ public:
 
     static void DrawHeader();
 
-    void link(int IdStart, int IdEnd);
+    void link(int newIn, int newOut);
+
+    void ClearLink();
 
     void edit();
 
-    bool islinked() const;
+    bool linked() const;
 
     bool CanBeUsed() const;
 
@@ -38,3 +41,5 @@ public:
 
     pipe();
 };
+
+

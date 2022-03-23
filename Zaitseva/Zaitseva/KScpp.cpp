@@ -2,9 +2,27 @@
 
 using namespace std;
 
+int KS::MaxId = 0;
+
 void KS::DrawHeader() {
     cout << setw(10) << "ID" << setw(20) << "Название" << setw(20) << "Кол-во цехов" << setw(20) << "Цехов в работе"
         << setw(20) << "Эффективность" << endl;
+}
+
+void KS::createLink()
+{
+    if (!connected)
+        connected = true;
+}
+
+void KS::ClearLink()
+{
+    connected = false;
+}
+
+bool KS::linked()
+{
+    return connected;
 }
 
 void KS::edit(int NewCountInWork) {
@@ -20,32 +38,31 @@ std::ostream& operator<<(ostream& out, const KS& k) {
     return out;
 }
 
-std::ofstream& operator<<(ofstream& fout, const KS& k){
+std::ofstream& operator<<(ofstream& fout, const KS& k) {
     fout << k.Name << endl
         << k.Count << endl
         << k.CountInWork << endl
-        << k.Efficiency << endl;
+        << k.Efficiency << endl
+        << (k.connected == true ? '1' : '0') << endl;
     return fout;
 }
 
 std::istream& operator>>(istream& in, KS& NewKS) {
     cout << "Введите характеристики компрессорной станции: " << endl << "Имя: " << endl;
-    NewKS.Name = input::StrInput();
+    NewKS.Name = StrInput();
     cout << "Кол-во цехов: " << endl;
-    NewKS.Count = input::NumberInput(1);
+    NewKS.Count = NumberInput(1);
     cout << "Кол-во цехов в работе: " << endl;
-    NewKS.CountInWork = input::NumberInput(1, NewKS.Count);
+    NewKS.CountInWork = NumberInput(1, NewKS.Count);
     cout << "Эффективность: " << endl;
-    NewKS.Efficiency = input::NumberInput(0., 1.);
+    NewKS.Efficiency = NumberInput(0., 1.);
     return in;
 }
 
-std::ifstream& operator>>(ifstream& fin, KS& NewKS){
-    string input;
-    getline(fin, input);
-    getline(fin, input);
-    NewKS.Name = input;
-    fin >> NewKS.Count >> NewKS.CountInWork >> NewKS.Efficiency;
+std::ifstream& operator>>(ifstream& fin, KS& NewKS) {
+    fin >> ws;
+    getline(fin, NewKS.Name);
+    fin >> NewKS.Count >> NewKS.CountInWork >> NewKS.Efficiency >> NewKS.connected;
     return fin;
 }
 

@@ -2,13 +2,15 @@
 
 using namespace std;
 
+int pipe::MaxId = 0;
+
 void pipe::DrawHeader() {
     cout << setw(10) << "ID" << setw(20) << "Название" << setw(20) << "Длина" << setw(20) << "Диаметр" << setw(20)
         << "В ремонте" << endl;
 }
 
 void pipe::link(int newIn, int newOut) {
-    if (in == 0 && out == 0 && newIn != -1 && newOut != -1 && newOut != newIn) {
+    if (in == 0 && out == 0 && newOut != newIn) {
         out = newOut;
         in = newIn;
     }
@@ -16,11 +18,16 @@ void pipe::link(int newIn, int newOut) {
         cout << "Ошибка" << endl;
 }
 
+void pipe::ClearLink() {
+    out = 0;
+    in = 0;
+}
+
 void pipe::edit() {
     repair = !repair;
 }
 
-bool pipe::islinked() const {
+bool pipe::linked() const {
     return in > 0 && out > 0;
 }
 

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-string input::StrInput() {
+string StrInput() {
     string inputStr;
     while (true) {
         getline(cin, inputStr);
