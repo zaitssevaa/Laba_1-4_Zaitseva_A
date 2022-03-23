@@ -5,9 +5,11 @@
 #include <fstream>  //файлы
 #include <ctime> // для рандомных id
 #include <unordered_map>
+#include <set>
 #include "Pipe.h"
 #include "KS.h"
 #include "input.h"
+#include "Gts.h"
 
 using namespace std;
 
@@ -71,8 +73,7 @@ void EditAllPipes(unordered_map<int, pipe>& pipes) {
         pipe::DrawHeader();
         cout << setw(10) << id << pipes[id] << "Успешное редактирование" << endl;
         return;
-    }
-    else
+    } else
         cout << "Такого id не существует " << endl;
 }
 
@@ -86,8 +87,7 @@ void EditAllKompres(unordered_map<int, KS>& kompres) {
         KS::DrawHeader();
         cout << setw(10) << id << kompres[id] << "Успешное редактирование" << endl;
         return;
-    }
-    else
+    }else
         cout << "Такого id не существует " << endl;
 }
 
@@ -154,9 +154,8 @@ bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, 
 // Удаление
 template<typename T>
 void DeleteElement(T& map, int id) {
-    if (map.find(id) != map.end()) {
+    if (map.find(id) != map.end()) 
         map.erase(id);
-    }
 }
 
 template<typename T>
@@ -207,8 +206,7 @@ void PrintFindResult(const unordered_map<int, T>& map, const vector<int>& index)
         T::DrawHeader();
         for (auto& id : index)
             cout << setw(10) << id << map.at(id);
-    }
-    else
+    }else
         cout << "Ничего не найдено " << endl;
 }
 
@@ -222,8 +220,7 @@ vector<int> FindByName(const unordered_map<int, T>& map) {
 
 vector<int> FindByRepair(const unordered_map<int, pipe>& pipes) {
     cout << "Какие трубы нужно искать (1 - в ремонте, 0 - не в ремонте): " << endl;
-    vector<int> index = {};
-    index = FindByFilter(pipes, CheckByRepair, bool(input::NumberInput(0, 1)));
+    vector<int> index = FindByFilter(pipes, CheckByRepair, bool(NumberInput(0, 1)));
     PrintFindResult(pipes, index);
     return index;
 }
@@ -236,37 +233,34 @@ vector<int> FindByPercent(const unordered_map<int, KS> kompres) {
 }
 
 void EditingAfterFind(unordered_map<int, pipe>& pipes, vector<int> index) {
-    cout << "1. Редактировать найденые " << endl << "2. Выбрать и редактировать " << endl << "3. Удалить найденные" << endl << "4. Выбрать и удалить"
-        << endl;
-    int casemenu = input::NumberInput(0, 4);
+    cout << "1. Редактировать найденые " << endl << "2. Выбрать и редактировать " << endl << "3. Удалить найденные"
+        << endl << "4. Выбрать и удалить" << endl << "0. Выход" << endl;
+    int casemenu = NumberInput(0, 4);
     if (casemenu == 1) {
         for (auto& id : index)
             pipes[id].edit();
-    }
-    else if (casemenu == 2) {
+    } else if (casemenu == 2) {
         cout << "Введите Id (0-конец ввода) " << endl;
         int input;
-        vector<int> edit_id;
+        set<int> edit_id;
         do {
-            input = input::NumberInput(0);
+            input = NumberInput(0);
             if (SearchIdInVector(index, input) == 1)
-                edit_id.push_back(input);
+                edit_id.insert(input);
         } while (input != 0);
         for (auto& id : edit_id)
             pipes[id].edit();
-    }
-    else if (casemenu == 3) {
+    } else if (casemenu == 3) {
         for (auto& id : index)
             DeleteElement(pipes, id);
-    }
-    else if (casemenu == 4) {
+    } else if (casemenu == 4) {
         cout << "Введите Id (0-конец ввода) " << endl;
         int input;
-        vector<int> edit_id;
+        set<int> edit_id;
         do {
-            input = input::NumberInput(0);
+            input = NumberInput(0);
             if (SearchIdInVector(index, input) == 1)
-                edit_id.push_back(input);
+                edit_id.insert(input);
         } while (input != 0);
         for (auto& id : edit_id)
             DeleteElement(pipes, id);
@@ -279,39 +273,17 @@ void PipeFilterMenu(unordered_map<int, pipe>& pipes) {
         return;
     }
     cout << endl << "Фильтр/редактирование труб" << endl << "1. Поиск труб по названию" << endl
-        << "2. Поиск труб по признаку в ремонте " << endl << "3. Ввести id вручную " << endl;
-    int FilterCase = input::NumberInput(0);
+        << "2. Поиск труб по признаку в ремонте " << endl << "0. Выход" << endl;
+    int FilterCase = NumberInput(0, 2);
     if (FilterCase == 1) {
         vector<int> index = FindByName(pipes);
         if (index.size() != 0)
             EditingAfterFind(pipes, index);
         return;
-    }
-    else if (FilterCase == 2) {
+    } else if (FilterCase == 2) {
         vector<int> index = FindByRepair(pipes);
         if (index.size() != 0)
             EditingAfterFind(pipes, index);
-        return;
-    }
-    else if (FilterCase == 3) {
-        cout << "Введите ID труб, которые нужно отредактировать: " << endl;
-        int input;
-        vector<int> edit_id;
-        do {
-            input = input::NumberInput(0);
-            if (SearchId(pipes, input) != -1)
-                edit_id.push_back(input);
-        } while (input != 0);
-        if (edit_id.size() != 0) {
-            cout << "1. Редактировать " << "2. Удалить " << endl;
-            int casemenu = input::NumberInput(0);
-            if (casemenu == 1)
-                for (auto& id : edit_id)
-                    pipes[id].edit();
-            else if (casemenu == 2)
-                for (auto& id : edit_id)
-                    DeleteElement(pipes, id);
-        }
         return;
     }
 }
@@ -326,14 +298,13 @@ void KSFilterMenu(unordered_map<int, KS>& kompres) {
     int FilterCase = input::NumberInput(1, 2);
     if (FilterCase == 1) {
         FindByName(kompres);
-    }
-    else if (FilterCase == 2) {
+    } else if (FilterCase == 2) {
         FindByPercent(kompres);
     }
     return;
 }
 
-int main(){
+int main() {
     setlocale(LC_CTYPE, "Russian");
     unordered_map<int, pipe> pipes;
     unordered_map<int, KS> kompres;
@@ -452,9 +423,8 @@ int main(){
                 int out = SearchId(kompres, NumberInput(0));
                 cout << "Введите ID КС, куда входит труба: " << endl;
                 int in = SearchId(kompres, NumberInput(0));
-                if (pipeId != -1 && pipes[pipeId].in == 0 && pipes[pipeId].out == 0 && in != -1 && out != -1 && in != out) {
+                if (pipeId != -1) {
                     pipes[pipeId].link(in, out);
-                    cout << "Объекты соединены " << endl;
                 }
                 else
                     cout << "Ошибка" << endl;
@@ -465,14 +435,40 @@ int main(){
         }
         case 12: {
             if (pipes.size() > 0 && kompres.size() > 1) {
-                for (auto& p : pipes)
-                    if (p.second.islinked())
-                        p.second.showlink(p.first);
+                for (auto& [i, p] : pipes)
+                    if (p.islinked())
+                        p.showlink(i);
             }
             else
                 cout << "Ошибка " << endl;
             break;
         }
+               //case 13:
+               //{
+               //    set<int> vertices;
+               //    for (const auto& [i, p] : pipes)
+               //        if (p.CanBeUsed() && kompres.count(p.in) && kompres.count(p.out))
+               //        {
+               //            vertices.insert(p.out);
+               //            vertices.insert(p.in);
+               //        }
+               //    unordered_map<int, int> VerticesIndex, VerticesIndexReverse;
+               //    int i = 0;
+               //    for (const int& v : vertices) {
+               //        VerticesIndex.insert({ i, v });
+               //        VerticesIndexReverse.insert({ v,i++ });
+               //    }
+               //    vector<vector<int>> r;
+               //    r.resize(vertices.size());
+               //    for (const auto& p : pipes)
+               //        if (p.second.CanBeUsed())
+               //            r[VerticesIndexReverse[p.second.out]].push_back(VerticesIndexReverse[p.second.in]);
+               //    Gts ESG(r);
+               //    if (ESG.Cyclical() == false)
+               //        cout << "no";
+               //    else cout << "yes";
+               //    break;
+               //}
         case 0: {
             return 0;
         }

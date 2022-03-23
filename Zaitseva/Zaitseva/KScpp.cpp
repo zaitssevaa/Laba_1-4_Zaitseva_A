@@ -20,8 +20,7 @@ std::ostream& operator<<(ostream& out, const KS& k) {
     return out;
 }
 
-std::ofstream& operator<<(ofstream& fout, const KS& k)
-{
+std::ofstream& operator<<(ofstream& fout, const KS& k){
     fout << k.Name << endl
         << k.Count << endl
         << k.CountInWork << endl
@@ -41,8 +40,7 @@ std::istream& operator>>(istream& in, KS& NewKS) {
     return in;
 }
 
-std::ifstream& operator>>(ifstream& fin, KS& NewKS)
-{
+std::ifstream& operator>>(ifstream& fin, KS& NewKS){
     string input;
     getline(fin, input);
     getline(fin, input);

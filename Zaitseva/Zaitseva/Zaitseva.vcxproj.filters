@@ -24,6 +24,15 @@
     <ClCompile Include="Pipe.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Gts.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClCompile>
+    <ClCompile Include="Gts.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KS.h">
