@@ -1,11 +1,11 @@
 #include "Pipe.h"
 
 using namespace std;
-string name;
-double length;
-int diameter;
-bool repair;
-int in, out;
+
+void pipe::DrawHeader() {
+    cout << setw(10) << "ID" << setw(20) << "Название" << setw(20) << "Длина" << setw(20) << "Диаметр" << setw(20)
+        << "В ремонте" << endl;
+}
 
 void pipe::link(int in, int out) {
     this->out = out;
@@ -25,69 +25,45 @@ void pipe::showlink(int ID) const {
         << endl;
 }
 
-void pipe::save(ofstream& fout) const {
-    fout << name << endl
-        << length << endl
-        << diameter << endl
-        << repair << endl
-        << in << endl
-        << out << endl;
-}
-
-void pipe::load(ifstream& fin) {
-    string input;
-    getline(fin, input);
-    getline(fin, input);
-    name = input;
-    fin >> length >> diameter >> repair >> in >> out;
-}
-
 ostream& operator<<(std::ostream& out, const pipe& p) {
-    out << setw(20) << p.name <<
+    out << setw(20) << p.Name <<
         setw(20) << p.length <<
         setw(20) << p.diameter <<
         setw(20) << ((p.repair == true) ? "Да" : "Нет") << endl;
     return out;
 }
 
-std::istream& operator>>(istream& in, pipe& NewPipe) {
+istream& operator>>(istream& in, pipe& NewPipe) {
     cout << "Введите характеристики трубы: " << endl << "Имя: " << endl;
-    while (true) {
-        string inputStr;
-        getline(in, inputStr);
-        inputStr.erase(0, inputStr.find_first_not_of(" \n\r\t"));
-        inputStr.erase(inputStr.find_last_not_of(" \n\r\t") + 1); //https://stackoverflow.com/a/33099753
-        if (inputStr.length() > 0) {
-            NewPipe.name = inputStr;
-            break;
-        }
-        else
-            cout << "Имя не может быть пустым, попробуйте еще раз: " << endl;
-    }
+    NewPipe.Name = input::StrInput();
     cout << "Длина: " << endl;
-    while (true) {
-        double inputDouble = NumberInput(0.);
-        if (inputDouble > 0) {
-            NewPipe.length = inputDouble;
-            break;
-        }
-        else cout << "Длина не может быть нулевой" << endl;
-    }
+    NewPipe.length = input::NumberInput(0.01);
     cout << "Диаметр: " << endl;
-    int inputInt = NumberInput(1);
-    NewPipe.diameter = inputInt;
+    NewPipe.diameter = input::NumberInput(1);
     cout << "Введите 1, если труба в ремонте, или 0, если труба не в ремонте: " << endl;
-    while (true) {
-        char inputChar = getchar();
-        cin.ignore(10000, '\n');
-        if (inputChar == '1' || inputChar == '0') {
-            NewPipe.repair = (inputChar == '1') ? true : false;
-            break;
-        }
-        else
-            cout << "Введен некорректный символ, попробуйте еще раз: " << endl;
-    }
+    NewPipe.repair = (input::NumberInput(0, 1) == 1) ? true : false;
     return in;
+}
+
+ofstream& operator<<(ofstream& fout, const pipe& p)
+{
+    fout << p.Name << endl
+        << p.length << endl
+        << p.diameter << endl
+        << p.repair << endl
+        << p.in << endl
+        << p.out << endl;
+    return fout;
+}
+
+ifstream& operator>>(ifstream& fin, pipe& NewPipe)
+{
+    string input;
+    getline(fin, input);
+    getline(fin, input);
+    NewPipe.Name = input;
+    fin >> NewPipe.length >> NewPipe.diameter >> NewPipe.repair >> NewPipe.in >> NewPipe.out;
+    return fin;
 }
 
 pipe::pipe() {

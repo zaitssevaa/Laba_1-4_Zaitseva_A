@@ -14,15 +14,17 @@ public:
     int Count, CountInWork;
     double Efficiency;
 
+    static void DrawHeader();
+
     void edit(int NewCountInWork);
 
-    void save(ofstream& out) const;
+    friend ostream &operator<<(ostream& out, const KS& k);
 
-    void load(ifstream&);
+    friend ofstream& operator<<(ofstream& fout, const KS& k);
 
-    friend std::ostream& operator<<(ostream& out, const KS& k);
+    friend istream &operator>>(istream &in, KS &NewKS);
 
-    friend std::istream& operator>>(istream& in, KS& NewKS);
+    friend istream& operator>>(istream& in, KS& NewKS);
 
     KS();
 };

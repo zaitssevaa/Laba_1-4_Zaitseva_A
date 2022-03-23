@@ -2,28 +2,14 @@
 
 using namespace std;
 
-string Name;
-int Count, CountInWork;
-double Efficiency;
+void KS::DrawHeader() {
+    cout << setw(10) << "ID" << setw(20) << "Название" << setw(20) << "Кол-во цехов" << setw(20) << "Цехов в работе"
+        << setw(20) << "Эффективность" << endl;
+}
 
 void KS::edit(int NewCountInWork) {
     if (NewCountInWork <= Count)
         CountInWork = NewCountInWork;
-}
-
-void KS::save(ofstream& fout) const {
-    fout << Name << endl
-        << Count << endl
-        << CountInWork << endl
-        << Efficiency << endl;
-}
-
-void KS::load(ifstream& fin) {
-    string input;
-    getline(fin, input);
-    getline(fin, input);
-    Name = input;
-    fin >> Count >> CountInWork >> Efficiency;
 }
 
 std::ostream& operator<<(ostream& out, const KS& k) {
@@ -34,51 +20,35 @@ std::ostream& operator<<(ostream& out, const KS& k) {
     return out;
 }
 
+std::ofstream& operator<<(ofstream& fout, const KS& k)
+{
+    fout << k.Name << endl
+        << k.Count << endl
+        << k.CountInWork << endl
+        << k.Efficiency << endl;
+    return fout;
+}
+
 std::istream& operator>>(istream& in, KS& NewKS) {
     cout << "Введите характеристики компрессорной станции: " << endl << "Имя: " << endl;
-    while (true) {
-        string inputStr;
-        getline(cin, inputStr);
-        inputStr.erase(0, inputStr.find_first_not_of(" \n\r\t"));
-        inputStr.erase(inputStr.find_last_not_of(" \n\r\t") + 1); //https://stackoverflow.com/a/33099753
-        if (inputStr.length() > 0) {
-            NewKS.Name = inputStr;
-            break;
-        }
-        else
-            cout << "Имя не может быть пустым, попробуйте еще раз: " << endl;
-    }
+    NewKS.Name = input::StrInput();
     cout << "Кол-во цехов: " << endl;
-    while (true) {
-        int inputInt = NumberInput(0);
-        if (inputInt > 0) {
-            NewKS.Count = inputInt;
-            break;
-        }
-        else
-            cout << "Кол-во цехов не может быть нулевым, попробуйте еще раз: " << endl;
-    }
+    NewKS.Count = input::NumberInput(1);
     cout << "Кол-во цехов в работе: " << endl;
-    while (true) {
-        int inputInt = NumberInput(0);
-        if (inputInt <= NewKS.Count) {
-            NewKS.CountInWork = inputInt;
-            break;
-        }
-        else
-            cout << "Кол-во цехов в работе не может быть больше общего кол-ва цехов: " << endl;
-    }
+    NewKS.CountInWork = input::NumberInput(1, NewKS.Count);
     cout << "Эффективность: " << endl;
-    while (true) {
-        double inputDouble = NumberInput(0.);
-        if (inputDouble >= 0. && inputDouble <= 1.) {
-            NewKS.Efficiency = inputDouble;
-            break;
-        }
-        else
-            cout << "Эффективность должна находиться в пределах от 0 до 1: " << endl;
-    }
+    NewKS.Efficiency = input::NumberInput(0., 1.);
     return in;
+}
+
+std::ifstream& operator>>(ifstream& fin, KS& NewKS)
+{
+    string input;
+    getline(fin, input);
+    getline(fin, input);
+    NewKS.Name = input;
+    fin >> NewKS.Count >> NewKS.CountInWork >> NewKS.Efficiency;
+    return fin;
 }
 
 KS::KS() {

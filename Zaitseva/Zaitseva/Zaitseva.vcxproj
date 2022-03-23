@@ -139,13 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="KS.cpp" />
-    <ClCompile Include="pipe.cpp" />
+    <ClCompile Include="KScpp.cpp" />
+    <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Zaitseva.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pipe.h" />
+    <ClInclude Include="input.h" />
     <ClInclude Include="KS.h" />
+    <ClInclude Include="Pipe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
