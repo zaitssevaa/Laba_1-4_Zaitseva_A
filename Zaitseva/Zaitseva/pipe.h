@@ -15,21 +15,10 @@ public:
     double length;
     int diameter;
     bool repair;
-    int in, out;
 
     static void DrawHeader();
 
-    void link(int newIn, int newOut);
-
-    void ClearLink();
-
     void edit();
-
-    bool linked() const;
-
-    bool CanBeUsed() const;
-
-    void showlink(int ID) const;
 
     friend ostream& operator<<(ostream& out, const pipe& p);
 

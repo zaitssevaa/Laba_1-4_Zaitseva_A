@@ -14,15 +14,8 @@ public:
     string Name;
     int Count, CountInWork;
     double Efficiency;
-    bool connected;
 
     static void DrawHeader();
-
-    void createLink();
-
-    void ClearLink();
-
-    bool linked();
 
     void edit(int NewCountInWork);
 

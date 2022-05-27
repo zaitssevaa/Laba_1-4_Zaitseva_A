@@ -9,35 +9,8 @@ void pipe::DrawHeader() {
         << "В ремонте" << endl;
 }
 
-void pipe::link(int newIn, int newOut) {
-    if (in == 0 && out == 0 && newOut != newIn) {
-        out = newOut;
-        in = newIn;
-    }
-    else
-        cout << "Ошибка" << endl;
-}
-
-void pipe::ClearLink() {
-    out = 0;
-    in = 0;
-}
-
 void pipe::edit() {
     repair = !repair;
-}
-
-bool pipe::linked() const {
-    return in > 0 && out > 0;
-}
-
-bool pipe::CanBeUsed() const {
-    return in > 0 && out > 0 && repair == false;
-}
-
-void pipe::showlink(int ID) const {
-    cout << "КС " << out << " -> труба " << ID << " -> КС " << in << ((repair == true) ? " В ремонте " : " Работает ")
-        << endl;
 }
 
 ostream& operator<<(std::ostream& out, const pipe& p) {
@@ -64,16 +37,14 @@ ofstream& operator<<(ofstream& fout, const pipe& p) {
     fout << p.Name << endl
         << p.length << endl
         << p.diameter << endl
-        << p.repair << endl
-        << p.in << endl
-        << p.out << endl;
+        << p.repair << endl;
     return fout;
 }
 
 ifstream& operator>>(ifstream& fin, pipe& NewPipe) {
     fin >> ws;
     getline(fin, NewPipe.Name);
-    fin >> NewPipe.length >> NewPipe.diameter >> NewPipe.repair >> NewPipe.in >> NewPipe.out;
+    fin >> NewPipe.length >> NewPipe.diameter >> NewPipe.repair;
     return fin;
 }
 
@@ -82,6 +53,4 @@ pipe::pipe() {
     length = 0.;
     diameter = 0;
     repair = false;
-    in = 0;
-    out = 0;
 }

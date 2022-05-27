@@ -9,22 +9,6 @@ void KS::DrawHeader() {
         << setw(20) << "Ёффективность" << endl;
 }
 
-void KS::createLink()
-{
-    if (!connected)
-        connected = true;
-}
-
-void KS::ClearLink()
-{
-    connected = false;
-}
-
-bool KS::linked()
-{
-    return connected;
-}
-
 void KS::edit(int NewCountInWork) {
     if (NewCountInWork <= Count)
         CountInWork = NewCountInWork;
@@ -42,8 +26,7 @@ std::ofstream& operator<<(ofstream& fout, const KS& k) {
     fout << k.Name << endl
         << k.Count << endl
         << k.CountInWork << endl
-        << k.Efficiency << endl
-        << (k.connected == true ? '1' : '0') << endl;
+        << k.Efficiency << endl;
     return fout;
 }
 
@@ -62,7 +45,7 @@ std::istream& operator>>(istream& in, KS& NewKS) {
 std::ifstream& operator>>(ifstream& fin, KS& NewKS) {
     fin >> ws;
     getline(fin, NewKS.Name);
-    fin >> NewKS.Count >> NewKS.CountInWork >> NewKS.Efficiency >> NewKS.connected;
+    fin >> NewKS.Count >> NewKS.CountInWork >> NewKS.Efficiency;
     return fin;
 }
 

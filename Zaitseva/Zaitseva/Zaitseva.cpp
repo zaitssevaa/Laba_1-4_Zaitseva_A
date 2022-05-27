@@ -7,8 +7,7 @@
 #include "pipe.h"
 #include "KS.h"
 #include "input.h"
-#include "Gts.h"
-#include "Filter.h"
+#include "filter.h"
 
 using namespace std;
 
@@ -29,10 +28,6 @@ void DrawMenu() {
         "8. Удалить трубу  " << endl <<
         "9. Удалить КС  " << endl <<
         "10. Фильтры/пакетное редактирование " << endl <<
-        "11. Соединить трубу " << endl <<
-        "12. Удалить связи " << endl <<
-        "13. Показать связи " << endl <<
-        "14. Топологическая сортировка " << endl <<
         "0. Выход  " << endl <<
         "Выберите пункт меню: ";
 }
@@ -53,10 +48,6 @@ void EditAllPipes(unordered_map<int, pipe>& pipes) {
     cout << "Введите id трубы, которую хотите изменить: " << endl;
     int id = NumberInput(0);
     if (SearchId(pipes, id) != -1) {
-        if (pipes[id].linked() && pipes[id].repair == 0) {
-            cout << "Труба " << id << " включена в сеть, вы уверены, что хотите выключить ее ? (1 - да, 0 - нет)" << endl;
-            if (NumberInput(0, 1) == 0) return;
-        }
         pipes[id].edit();
         pipe::DrawHeader();
         cout << setw(10) << id << pipes[id] << "Успешное редактирование" << endl;
@@ -67,8 +58,8 @@ void EditAllPipes(unordered_map<int, pipe>& pipes) {
 }
 
 void EditAllKompres(unordered_map<int, KS>& kompres) {
-    int NewCountInWork, id = NumberInput(0);
     cout << "Введите id станции, которую хотите изменить: " << endl;
+    int NewCountInWork, id = NumberInput(0);
     if (SearchId(kompres, id) != -1) {
         cout << "Введите количество цехов в работе: " << endl;
         NewCountInWork = NumberInput(0, kompres[id].Count);
@@ -152,74 +143,13 @@ void Delete(unordered_map<int, T>& map) {
         int id = NumberInput(0);
         if (id == 0) return;
         if (SearchId(map, id) != -1) {
-            if (map.at(id).linked()) {
-                cout << "Элемент находится в ГТС, сначала выключите его" << endl;
-                return;
-            }
-            else {
-                DeleteElement(map, id);
-                cout << "Элемент с id " << id << " удален";
-                return;
-            }
+            DeleteElement(map, id);
+            cout << "Элемент с id " << id << " удален";
+            return;
         }
         else
             cout << "ID не найден, попробуйте еще раз: ";
     }
-}
-
-void ShowConnection(const unordered_map<int, pipe>& pipes) {
-    for (auto& [i, p] : pipes)
-        if (p.linked())
-            p.showlink(i);
-}
-
-void CreateBranch(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres) {
-    cout << "Введите ID трубы, которую нужно связать: " << endl;
-    int pipeId = SearchId(pipes, NumberInput(0));
-    cout << "Введите ID КС, откуда выходит труба: " << endl;
-    int out = SearchId(kompres, NumberInput(0));
-    cout << "Введите ID КС, куда входит труба: " << endl;
-    int in = SearchId(kompres, NumberInput(0));
-    if (pipeId != -1 && pipes[pipeId].in == 0 && pipes[pipeId].out == 0 && out != -1 && in != -1 && out != in) {
-        pipes[pipeId].link(in, out);
-        kompres[in].createLink();
-        kompres[out].createLink();
-    }
-    else
-        cout << "Ошибка" << endl;
-}
-
-void DeleteBranches(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres) {
-    ShowConnection(pipes);
-    cout << "Введите ID трубы, связь которой хотите удалить: " << endl;
-    int pipeId = SearchId(pipes, NumberInput(0));
-    if (pipeId != -1 && pipes[pipeId].linked()) {
-        kompres[pipes[pipeId].in].ClearLink();
-        kompres[pipes[pipeId].out].ClearLink();
-        pipes[pipeId].ClearLink();
-    }
-    else
-        cout << "Ошибка" << endl;
-}
-
-vector<vector<int>> CreateGraph(const unordered_map<int, pipe>& pipes, const unordered_map<int, KS>& kompres) {
-    set<int> vertices;
-    for (const auto& [i, p] : pipes)
-        if (p.CanBeUsed() && kompres.count(p.in) && kompres.count(p.out))
-        {
-            vertices.insert(p.out);
-            vertices.insert(p.in);
-        }
-    unordered_map<int, int> VerticesIndex;
-    int i = 0;
-    for (const int& v : vertices)
-        VerticesIndex.insert({ v, i++ });
-    vector<vector<int>> r;
-    r.resize(vertices.size());
-    for (const auto& [i, p] : pipes)
-        if (p.CanBeUsed())
-            r[VerticesIndex[p.out]].push_back(VerticesIndex[p.in]);
-    return r;
 }
 
 int main() {
@@ -279,7 +209,7 @@ int main() {
             cout << "Введите название файла: ";
             string FileName;
             getline(cin, FileName);
-            if (CreateFile(pipes, kompres, "./saves/" + FileName)) {
+            if (CreateFile(pipes, kompres, FileName)) {
                 cout << "Данные сохранены в файл" << endl;
             }
             else
@@ -290,7 +220,7 @@ int main() {
             cout << "Введите название файла: ";
             string FileName;
             getline(cin, FileName);
-            if (ReadFile(pipes, kompres, "./saves/" + FileName)) {
+            if (ReadFile(pipes, kompres, FileName)) {
                 cout << "Данные успешно загружены" << endl;
                 ShowAllPipes(pipes);
                 ShowAllKompres(kompres);
@@ -329,46 +259,6 @@ int main() {
             else if (editCase == 2) {
                 KSFilterMenu(kompres);
             }
-            break;
-        }
-        case 11: {
-            if (pipes.size() > 0 && kompres.size() > 1)
-                CreateBranch(pipes, kompres);
-            else
-                cout << "Необходимые элементы не были добавлены " << endl;
-            break;
-        }
-        case 12:
-        {
-            if (pipes.size() > 0 && kompres.size() > 1)
-                DeleteBranches(pipes, kompres);
-            else
-                cout << "Ошибка " << endl;
-            break;
-        }
-        case 13: {
-            if (pipes.size() > 0 && kompres.size() > 1)
-                ShowConnection(pipes);
-            else
-                cout << "Ошибка " << endl;
-            break;
-        }
-        case 14:
-        {
-            vector<vector<int>> r = CreateGraph(pipes, kompres);
-            Gts ESG(r);
-            set<int> vertices;
-            for (const auto& [i, p] : pipes)
-                if (p.CanBeUsed() && kompres.count(p.in) && kompres.count(p.out))
-                {
-                    vertices.insert(p.out);
-                    vertices.insert(p.in);
-                }
-            unordered_map<int, int> VerticesIndex;
-            int i = 0;
-            for (const int& v : vertices)
-                VerticesIndex.insert({ i++, v });
-            ESG.TopologicalSort(VerticesIndex);
             break;
         }
         case 0: {
