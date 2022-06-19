@@ -142,11 +142,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="KS.cpp" />
     <ClCompile Include="pipe.cpp" />
     <ClCompile Include="Zaitseva.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Input.h" />
+    <ClInclude Include="KS.h" />
     <ClInclude Include="pipe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

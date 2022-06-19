@@ -5,6 +5,7 @@
 #include "input.h"
 #include "pipe.h"
 #include <unordered_map>
+#include "KS.h"
 using namespace std;
 
 void DrawMenu() {
@@ -28,10 +29,17 @@ void ShowAllPipes(const unordered_map<int, pipe>& pipes) {
     for (auto& [i, p] : pipes) cout << setw(10) << i << p;
 }
 
+void ShowAllKompres(const unordered_map<int, KS>& kompres) {
+    cout << "Компрессорные станции" << endl;
+    KS::DrawHeader();
+    for (auto& [i, k] : kompres) cout << setw(10) << i << k;
+}
+
 int main()
 {
     setlocale(LC_CTYPE, "Russian");
-    unordered_map<int, pipe> pipes; 
+    unordered_map<int, pipe> pipes;
+    unordered_map<int, KS> kompres;
     char inputmenu;
     while (true) {
         DrawMenu();
@@ -45,7 +53,10 @@ int main()
             break;
         }
         case 2: {
-            cout << "2\n";
+            KS NewKS;
+            int NewID = ++NewKS.MaxId;
+            cin >> NewKS;
+            kompres.insert({ NewID, NewKS });
             break;
         }
         case 3: {
@@ -53,6 +64,11 @@ int main()
                 cout << "Трубы не были добавлены, выводить нечего" << endl;
             else
                 ShowAllPipes(pipes);
+            cout << endl;
+            if (kompres.size() == 0)
+                cout << "Компрессорные станции не были добавлены, выводить нечего" << endl;
+            else
+                ShowAllKompres(kompres);
             break;
         }
         case 4: {
