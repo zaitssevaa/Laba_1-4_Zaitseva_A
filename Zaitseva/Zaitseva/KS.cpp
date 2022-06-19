@@ -9,6 +9,11 @@ void KS::DrawHeader() {
         << setw(20) << "Эффективность" << endl;
 }
 
+void KS::edit(int NewCountInWork) {
+    if (NewCountInWork <= Count)
+        CountInWork = NewCountInWork;
+}
+
 std::ostream& operator<<(ostream& out, const KS& k) {
     out << setw(20) << k.Name <<
         setw(20) << k.Count <<

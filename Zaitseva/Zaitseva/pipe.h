@@ -16,6 +16,8 @@ public:
     int diameter;
     bool repair;
 
+    void edit();
+
     static void DrawHeader();
 
     friend ostream& operator<<(ostream& out, const pipe& p);

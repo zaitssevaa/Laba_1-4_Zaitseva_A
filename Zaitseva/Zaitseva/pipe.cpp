@@ -9,6 +9,10 @@ void pipe::DrawHeader() {
         << "В ремонте" << endl;
 }
 
+void pipe::edit() {
+    repair = !repair;
+}
+
 ostream& operator<<(std::ostream& out, const pipe& p) {
     out << setw(20) << p.Name <<
         setw(20) << p.length <<

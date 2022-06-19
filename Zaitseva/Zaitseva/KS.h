@@ -16,6 +16,8 @@ public:
 
     static void DrawHeader();
 
+    void edit(int NewCountInWork);
+
     friend ostream& operator<<(ostream& out, const KS& k);
 
     friend istream& operator>>(istream& in, KS& NewKS);

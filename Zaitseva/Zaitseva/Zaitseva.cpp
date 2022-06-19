@@ -8,6 +8,12 @@
 #include "KS.h"
 using namespace std;
 
+template<typename T>
+int SearchId(const T& map, int id) {
+    if (map.find(id) != map.end()) return id;
+    return -1;
+}
+
 void DrawMenu() {
     cout << "1. Добавить трубу " << endl <<
         "2. Добавить КС  " << endl <<
@@ -34,6 +40,36 @@ void ShowAllKompres(const unordered_map<int, KS>& kompres) {
     KS::DrawHeader();
     for (auto& [i, k] : kompres) cout << setw(10) << i << k;
 }
+
+void EditAllPipes(unordered_map<int, pipe>& pipes) {
+    cout << "Введите id трубы, которую хотите изменить: " << endl;
+    int id = NumberInput(0);
+    if (SearchId(pipes, id) != -1) {
+        pipes[id].edit();
+        pipe::DrawHeader();
+        cout << setw(10) << id << pipes[id] << "Успешное редактирование" << endl;
+        return;
+    }
+    else
+        cout << "Такого id не существует " << endl;
+}
+
+void EditAllKompres(unordered_map<int, KS>& kompres) {
+    cout << "Введите id станции, которую хотите изменить: " << endl;
+    int NewCountInWork, id = NumberInput(0);
+    if (SearchId(kompres, id) != -1) {
+        cout << "Введите количество цехов в работе: " << endl;
+        NewCountInWork = NumberInput(0, kompres[id].Count);
+        kompres[id].edit(NewCountInWork);
+        KS::DrawHeader();
+        cout << setw(10) << id << kompres[id] << "Успешное редактирование" << endl;
+        return;
+    }
+    else
+        cout << "Такого id не существует " << endl;
+}
+
+
 
 int main()
 {
@@ -72,11 +108,21 @@ int main()
             break;
         }
         case 4: {
-            cout << "4\n";
+            if (pipes.size() > 0) {
+                ShowAllPipes(pipes);
+                EditAllPipes(pipes);
+            }
+            else
+                cout << "Трубопроводы не были добавлены, редактировать нечего" << endl;
             break;
         }
         case 5: {
-            cout << "5\n";
+            if (kompres.size() > 0) {
+                ShowAllKompres(kompres);
+                EditAllKompres(kompres);
+            }
+            else
+                cout << "Станции не были добавлены, редактировать нечего" << endl;
             break;
         }
         case 6: {
