@@ -3,6 +3,8 @@
 #include <conio.h>
 #include <vector>
 #include "input.h"
+#include "pipe.h"
+#include <unordered_map>
 using namespace std;
 
 void DrawMenu() {
@@ -20,16 +22,26 @@ void DrawMenu() {
         "Выберите пункт меню: ";
 }
 
+void ShowAllPipes(const unordered_map<int, pipe>& pipes) {
+    cout << "Трубопроводы" << endl;
+    pipe::DrawHeader();
+    for (auto& [i, p] : pipes) cout << setw(10) << i << p;
+}
+
 int main()
 {
     setlocale(LC_CTYPE, "Russian");
+    unordered_map<int, pipe> pipes; 
     char inputmenu;
     while (true) {
         DrawMenu();
         inputmenu = NumberInput(0);
         switch (inputmenu) {
         case 1: {
-            cout << "1\n";
+            pipe NewPipe;
+            int NewID = ++NewPipe.MaxId;
+            cin >> NewPipe;
+            pipes.insert({ NewID, NewPipe });
             break;
         }
         case 2: {
@@ -37,7 +49,10 @@ int main()
             break;
         }
         case 3: {
-            cout << "3\n";
+            if (pipes.size() == 0)
+                cout << "Трубы не были добавлены, выводить нечего" << endl;
+            else
+                ShowAllPipes(pipes);
             break;
         }
         case 4: {
