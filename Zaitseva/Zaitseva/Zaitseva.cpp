@@ -69,7 +69,69 @@ void EditAllKompres(unordered_map<int, KS>& kompres) {
         cout << "Такого id не существует " << endl;
 }
 
+bool CreateFile(const unordered_map<int, pipe>& pipes, const unordered_map<int, KS>& kompres, const string& FileName) {
+    ofstream fout;
+    fout.open(FileName);
+    if (!fout.is_open())
+        return false;
+    if (pipes.size() > 0) {
+        fout << "pipe" << endl << pipes.size() << endl << pipe::MaxId << endl;
+        for (auto& [i, p] : pipes) {
+            fout << i << endl;
+            fout << p;
+        }
+    }
+    else
+        fout << "nopipe" << endl;
+    if (kompres.size() > 0) {
+        fout << "kc" << endl << kompres.size() << endl << KS::MaxId << endl;
+        for (auto& [i, k] : kompres) {
+            fout << i << endl;
+            fout << k;
+        }
+    }
+    else
+        fout << "nokc" << endl;
+    fout.close();
+    return true;
+}
 
+bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, const string& FileName) {
+    pipes.clear();
+    ifstream fin;
+    string input;
+    fin.open(FileName);
+    if (!fin.is_open())
+        return false;
+    fin >> input;
+    if (input != "nopipe") {
+        int n;
+        pipe NewPipe;
+        int id;
+        fin >> n;
+        fin >> pipe::MaxId;
+        for (int i = 0; i < n; ++i) {
+            fin >> id;
+            fin >> NewPipe;
+            pipes.insert({ id, NewPipe });
+        }
+    }
+    kompres.clear();
+    fin >> input;
+    if (input != "nokc") {
+        KS NewKS;
+        int id;
+        int n;
+        fin >> n;
+        fin >> KS::MaxId;
+        for (int i = 0; i < n; ++i) {
+            fin >> id;
+            fin >> NewKS;
+            kompres.insert({ id, NewKS });
+        }
+    }
+    return true;
+}
 
 int main()
 {
@@ -126,11 +188,27 @@ int main()
             break;
         }
         case 6: {
-            cout << "6\n";
+            cout << "Введите название файла: ";
+            string FileName;
+            getline(cin, FileName);
+            if (CreateFile(pipes, kompres, FileName)) {
+                cout << "Данные сохранены в файл" << endl;
+            }
+            else
+                cout << "Не удалось создать файл" << endl;
             break;
         }
         case 7: {
-            cout << "7\n";
+            cout << "Введите название файла: ";
+            string FileName;
+            getline(cin, FileName);
+            if (ReadFile(pipes, kompres, FileName)) {
+                cout << "Данные успешно загружены" << endl;
+                ShowAllPipes(pipes);
+                ShowAllKompres(kompres);
+            }
+            else
+                cout << "Файл " << FileName << " не найден" << endl;
             break;
         }
         case 8: {

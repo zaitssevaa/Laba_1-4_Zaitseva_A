@@ -33,6 +33,21 @@ istream& operator>>(istream& in, pipe& NewPipe) {
     return in;
 }
 
+ofstream& operator<<(ofstream& fout, const pipe& p) {
+    fout << p.Name << endl
+        << p.length << endl
+        << p.diameter << endl
+        << p.repair << endl;
+    return fout;
+}
+
+ifstream& operator>>(ifstream& fin, pipe& NewPipe) {
+    fin >> ws;
+    getline(fin, NewPipe.Name);
+    fin >> NewPipe.length >> NewPipe.diameter >> NewPipe.repair;
+    return fin;
+}
+
 pipe::pipe() {
     Name = "";
     length = 0.;

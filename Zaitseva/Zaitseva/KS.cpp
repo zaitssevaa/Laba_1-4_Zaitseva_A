@@ -22,6 +22,14 @@ std::ostream& operator<<(ostream& out, const KS& k) {
     return out;
 }
 
+std::ofstream& operator<<(ofstream& fout, const KS& k) {
+    fout << k.Name << endl
+        << k.Count << endl
+        << k.CountInWork << endl
+        << k.Efficiency << endl;
+    return fout;
+}
+
 std::istream& operator>>(istream& in, KS& NewKS) {
     cout << "Введите характеристики компрессорной станции: " << endl << "Имя: " << endl;
     NewKS.Name = StrInput();
@@ -32,6 +40,13 @@ std::istream& operator>>(istream& in, KS& NewKS) {
     cout << "Эффективность: " << endl;
     NewKS.Efficiency = NumberInput(0., 1.);
     return in;
+}
+
+std::ifstream& operator>>(ifstream& fin, KS& NewKS) {
+    fin >> ws;
+    getline(fin, NewKS.Name);
+    fin >> NewKS.Count >> NewKS.CountInWork >> NewKS.Efficiency;
+    return fin;
 }
 
 KS::KS() {

@@ -22,7 +22,11 @@ public:
 
     friend ostream& operator<<(ostream& out, const pipe& p);
 
+    friend ofstream& operator<<(ofstream& fout, const pipe& p);
+
     friend istream& operator>>(istream& in, pipe& NewPipe);
+
+    friend ifstream& operator>>(ifstream& fin, pipe& NewPipe);
 
     pipe();
 };
