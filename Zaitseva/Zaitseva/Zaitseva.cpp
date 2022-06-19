@@ -1,74 +1,82 @@
 ﻿#include <iostream>
 #include <string>
 #include <conio.h>
-#include <sstream>
 #include <vector>
-
+#include "input.h"
 using namespace std;
 
-
-struct pipe {
-    unsigned int id;
-    double length, diameter;
-    bool repair;
-};
-vector<pipe> pipes;
-
+void DrawMenu() {
+    cout << "1. Добавить трубу " << endl <<
+        "2. Добавить КС  " << endl <<
+        "3. Просмотр всех объектов  " << endl <<
+        "4. Редактировать трубу  " << endl <<
+        "5. Редактировать КС  " << endl <<
+        "6. Сохранить  " << endl <<
+        "7. Загрузить  " << endl <<
+        "8. Удалить трубу  " << endl <<
+        "9. Удалить КС  " << endl <<
+        "10. Фильтры/пакетное редактирование " << endl <<
+        "0. Выход  " << endl <<
+        "Выберите пункт меню: ";
+}
 
 int main()
 {
     setlocale(LC_CTYPE, "Russian");
-    string s;
-    int input_menu;
-    pipes.resize(0);
-    while (true)
-    {
-        system("cls");
-        cout << "1. Добавить трубу \n2. Добавить КС \n3. Просмотр всех объектов \n4. Редактировать трубу \n5. Редактировать КС \n6. Сохранить \n7. Загрузить \n0. Выход \n";
-        input_menu = _getch();
-        switch (input_menu)
-        {
-        case '1':
-            system("cls");
+    char inputmenu;
+    while (true) {
+        DrawMenu();
+        inputmenu = NumberInput(0);
+        switch (inputmenu) {
+        case 1: {
             cout << "1\n";
-            cin >> s;
-            break;
-        case '2':
-            system("cls");
-            cout << "2\n";
-            cin >> s;
-            break;
-        case '3':
-            system("cls");
-            cout << "3\n";
-            cin >> s;
-            break;
-        case '4':
-            system("cls");
-            cout << "4\n";
-            cin >> s;
-            break;
-        case '5':
-            system("cls");
-            cout << "5\n";
-            cin >> s;
-            break;
-        case '6':
-            system("cls");
-            cout << "6\n";
-            cin >> s;
-            break;
-        case '7':
-            system("cls");
-            cout << "7\n";
-            cin >> s;
-            break;
-        case '0':
-            system("cls");
-            cout << "0\n";
-            cin >> s;
             break;
         }
+        case 2: {
+            cout << "2\n";
+            break;
+        }
+        case 3: {
+            cout << "3\n";
+            break;
+        }
+        case 4: {
+            cout << "4\n";
+            break;
+        }
+        case 5: {
+            cout << "5\n";
+            break;
+        }
+        case 6: {
+            cout << "6\n";
+            break;
+        }
+        case 7: {
+            cout << "7\n";
+            break;
+        }
+        case 8: {
+            cout << "8\n";
+            break;
+        }
+        case 9: {
+            cout << "9\n";
+            break;
+        }
+        case 10: {
+            cout << "10\n";
+            break;
+        }
+        case 0: {
+            cout << "0\n";
+            break;
+        }
+        default: {
+            cout << "такого пункта меню нет";
+        }
+        }
+        cout << "\n\n\n\n\n";
     }
     return 0;
 }
