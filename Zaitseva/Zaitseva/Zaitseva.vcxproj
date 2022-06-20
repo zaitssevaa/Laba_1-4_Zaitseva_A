@@ -141,12 +141,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="filters.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="KS.cpp" />
     <ClCompile Include="pipe.cpp" />
     <ClCompile Include="Zaitseva.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="filters.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="KS.h" />
     <ClInclude Include="pipe.h" />

@@ -135,12 +135,6 @@ bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, 
 }
 
 template<typename T>
-void DeleteElement(T& map, int id) {
-    if (map.find(id) != map.end())
-        map.erase(id);
-}
-
-template<typename T>
 void Delete(unordered_map<int, T>& map) {
     cout << endl << "Введите id элемента, который хотите удалить (или 0 чтобы вернуться в меню): ";
     while (true) {

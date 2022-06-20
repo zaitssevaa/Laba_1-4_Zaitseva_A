@@ -36,10 +36,8 @@ void EditingAfterFind(unordered_map<int, pipe>& pipes, vector<int> index) {
     int casemenu = NumberInput(0, 4);
     if (casemenu == 1) {
         for (auto& id : index) {
-            if (pipes[id].linked() && pipes[id].repair == 0) {
-                cout << "“руба " << id << " включена в сеть, вы уверены, что хотите выключить ее ? (1 - да, 0 - нет)" << endl;
-                if (NumberInput(0, 1) == 0) continue;
-            }
+            cout << "“руба " << id << " включена в сеть, вы уверены, что хотите выключить ее ? (1 - да, 0 - нет)" << endl;
+            if (NumberInput(0, 1) == 0) continue;
             pipes[id].edit();
         }
     }
@@ -53,17 +51,14 @@ void EditingAfterFind(unordered_map<int, pipe>& pipes, vector<int> index) {
                 edit_id.insert(input);
         } while (input != 0);
         for (auto& id : edit_id) {
-            if (pipes[id].linked() && pipes[id].repair == 0) {
-                cout << "“руба " << id << " включена в сеть, вы уверены, что хотите выключить ее ? (1 - да, 0 - нет)" << endl;
-                if (NumberInput(0, 1) == 0) continue;
-            }
+            cout << "“руба " << id << " включена в сеть, вы уверены, что хотите выключить ее ? (1 - да, 0 - нет)" << endl;
+            if (NumberInput(0, 1) == 0) continue;
             pipes[id].edit();
         }
     }
     else if (casemenu == 3) {
         for (auto& id : index)
-            if (!pipes[id].linked())
-                DeleteElement(pipes, id);
+            DeleteElement(pipes, id);
     }
     else if (casemenu == 4) {
         cout << "¬ведите Id (0-конец ввода) " << endl;
@@ -75,8 +70,7 @@ void EditingAfterFind(unordered_map<int, pipe>& pipes, vector<int> index) {
                 edit_id.insert(input);
         } while (input != 0);
         for (auto& id : edit_id)
-            if (!pipes[id].linked())
-                DeleteElement(pipes, id);
+            DeleteElement(pipes, id);
     }
 }
 
