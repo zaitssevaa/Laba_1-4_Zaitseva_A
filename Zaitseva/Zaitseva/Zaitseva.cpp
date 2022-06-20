@@ -6,6 +6,7 @@
 #include "pipe.h"
 #include <unordered_map>
 #include "KS.h"
+#include "filters.h"
 using namespace std;
 
 template<typename T>
@@ -254,7 +255,15 @@ int main()
             break;
         }
         case 10: {
-            cout << "10\n";
+            cout << endl << "Меню фильтров" << endl << "1. Поиск/редактирование труб " << endl << "2. Поиск КС "
+                << endl;
+            int editCase = NumberInput(0);
+            if (editCase == 1) {
+                PipeFilterMenu(pipes);
+            }
+            else if (editCase == 2) {
+                KSFilterMenu(kompres);
+            }
             break;
         }
         case 0: {
