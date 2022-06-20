@@ -133,6 +133,28 @@ bool ReadFile(unordered_map<int, pipe>& pipes, unordered_map<int, KS>& kompres, 
     return true;
 }
 
+template<typename T>
+void DeleteElement(T& map, int id) {
+    if (map.find(id) != map.end())
+        map.erase(id);
+}
+
+template<typename T>
+void Delete(unordered_map<int, T>& map) {
+    cout << endl << "Введите id элемента, который хотите удалить (или 0 чтобы вернуться в меню): ";
+    while (true) {
+        int id = NumberInput(0);
+        if (id == 0) return;
+        if (SearchId(map, id) != -1) {
+            DeleteElement(map, id);
+            cout << "Элемент с id " << id << " удален";
+            return;
+        }
+        else
+            cout << "ID не найден, попробуйте еще раз: ";
+    }
+}
+
 int main()
 {
     setlocale(LC_CTYPE, "Russian");
@@ -212,11 +234,23 @@ int main()
             break;
         }
         case 8: {
-            cout << "8\n";
+            if (pipes.size() > 0) {
+                ShowAllPipes(pipes);
+                Delete(pipes);
+                break;
+            }
+            else
+                cout << "Трубы не были добавлены, удалять нечего" << endl;
             break;
         }
         case 9: {
-            cout << "9\n";
+            if (kompres.size() > 0) {
+                ShowAllKompres(kompres);
+                Delete(kompres);
+                break;
+            }
+            else
+                cout << "Станции не были добавлены, удалять нечего" << endl;
             break;
         }
         case 10: {
